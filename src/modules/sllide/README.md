@@ -14,17 +14,17 @@ A saída final é um recorte **retificado** (corrigido de rotação/perspectiva)
 
 ## Sumário
 
-- [Visão geral da abordagem](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Premissas e limitações](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Dependências](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Como usar](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Descrição do pipeline (passo a passo)](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Detalhamento das funções](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-    - [`order_points`](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-    - [`crop_slide_with_label`](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Parâmetros ajustáveis](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Modo de falha e reforços recomendados](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
-- [Boas práticas](https://www.notion.so/README-md-Extrair-Foto-Macro-2eddc55c87ce801db9a2e4f3bad19a64?pvs=21)
+- [Visão geral da abordagem](#visão-geral-da-abordagem)
+- [Premissas e limitações](#premissas-e-limitações)
+- [Dependências](#dependências)
+- [Como usar](#como-usar)
+- [Descrição do pipeline (passo a passo)](#descrição-do-pipeline-passo-a-passo)
+- [Detalhamento das funções](#detalhamento-das-funções)
+  - [order_points](#order_points)
+  - [crop_slide_with_label](#crop_slide_with_label)
+- [Parâmetros ajustáveis](#parâmetros-ajustáveis)
+- [Modo de falha e reforços recomendados](#modo-de-falha-e-reforços-recomendados)
+- [Boas práticas](#boas-práticas)
 
 ---
 
