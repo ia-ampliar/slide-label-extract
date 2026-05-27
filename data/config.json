@@ -1,8 +1,8 @@
 {
-    "slide_img_path": "data/slide_img.png",
+    "slide_img_path": "data/slide_img_5.jpg",
     "output_boximg_path": "data/box_img.png",
     "output_image_path": "data/output/extracted_slide.jpg",
-    "case_id_list": ["([A-Z]).*?(\\d{2}).*?-.*?(\\d{6})"],
+    "case_id_list": ["([A-Z]{2}).*?(\\d{2}).*?-.*?(\\d{6})", "([A-Z]).*?(\\d{2}).*?-.*?(\\d{6})"],
     "mask_params": {
         "hsv_lower": [0, 0, 120],
         "hsv_upper": [179, 80, 255],

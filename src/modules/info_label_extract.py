@@ -15,6 +15,7 @@ from slide_extract import load_config, extract_slide
 import json
 import os
 from typing import List, Optional, Dict, Any
+import zxingcpp
 
 from rapidocr_onnxruntime import RapidOCR
 
@@ -132,17 +133,43 @@ def _preprocess_roi(
     gray = cv2.resize(gray, None, fx=upscale_factor, fy=upscale_factor, 
                       interpolation=cv2.INTER_CUBIC)
     
-    # Redução de ruído leve com desfoque gaussiano
+    # # Redução de ruído leve com desfoque gaussiano
     gray = cv2.GaussianBlur(gray, blur_kernel, 0)
     
-    # Binarização automática usando Otsu
-    _, bw = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # # Binarização automática usando Otsu
+    # _, bw = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
-    # Limpeza de grãos: remove pequenas componentes de ruído
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-    bw = cv2.morphologyEx(bw, cv2.MORPH_OPEN, kernel, iterations=1)
+    # # Limpeza de grãos: remove pequenas componentes de ruído
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    # bw = cv2.morphologyEx(bw, cv2.MORPH_OPEN, kernel, iterations=1)
     
-    return bw
+    img = gray
+
+    return img
+
+
+def extract_code_label_info(img: cv2.Mat) -> Optional[str]:
+
+    # tentar extrair QR code
+    try:
+        detector = cv2.QRCodeDetector()
+        data, _, _ = detector.detectAndDecode(img)
+        if data:
+            print(f"QR Code detectado: {data}")
+            return data
+    except Exception as e:
+        print(f"Erro ao tentar extrair QR Code: {e}")
+        
+    # tentar extrair DataMatrix ou Code128 usando zxingcpp
+    try:
+        resultados = zxingcpp.read_barcodes(img)
+        if resultados:
+            print(f"DataMatrix detectado: {resultados[0].text}")
+            return resultados[0].text
+    except Exception as e:
+        print(f"Erro ao tentar extrair DataMatrix: {e}")
+
+    return None
 
 
 def extract_label_info_ocr(
@@ -189,9 +216,14 @@ def extract_label_info_ocr(
     h, w = slide_image.shape[:2]
 
     # ===== ETAPA 1: Extrair ROI da etiqueta =====
-    # Extrai apenas a região esquerda da imagem (onde fica a etiqueta)
-    roi_width = int(w * roi_width_ratio)
-    roi_bgr = slide_image[:, :roi_width]
+    # Extrai apenas a região esquerda da imagem (onde fica a etiqueta) se a largura for pelo menos 2x maior que a altura
+    h, w = slide_image.shape[:2]
+
+    if w >= 2 * h:
+        roi_width = int(w * roi_width_ratio)
+        roi_bgr = slide_image[:, :roi_width]
+    else:
+        roi_bgr = slide_image  # Se a imagem for pequena, usar toda a imagem como ROI
     
     if roi_bgr.size == 0:
         raise ValueError(f"ROI inválida. Dimensões: {roi_bgr.shape}")
@@ -201,12 +233,15 @@ def extract_label_info_ocr(
         roi_bgr = cv2.rotate(roi_bgr, cv2.ROTATE_90_CLOCKWISE)
     
     # ===== ETAPA 3: Pré-processamento da imagem =====
-    bw = _preprocess_roi(roi_bgr)
+    gray = _preprocess_roi(roi_bgr)
+
+    # salva gray para debug
+    cv2.imwrite("data/output/roi_gray.jpg", gray)
     
     # ===== ETAPA 4: OCR com RapidOCR =====
     try:
         engine = RapidOCR()
-        result, _ = engine(bw)
+        result, _ = engine(gray)
         # concatena todo o texto
         text = "\n".join([linha[1] for linha in result])
         print(f"Texto extraído pelo OCR: \n{text}")
@@ -218,11 +253,17 @@ def extract_label_info_ocr(
     # ===== ETAPA 5: Extração de padrões =====
     found_ids = extract_pattern(text, patterns=patterns, config_path=config_path)
     print(f"Padrões encontrados: {found_ids}")
+
+    # ==== ETAPA 6: Extração de informaçoes do código (QR, DataMatrix ou Code128) ====
+
+    code_info = extract_code_label_info(gray)
+        
     
     if found_ids:
-        return found_ids[0]  # Retorna o primeiro ID encontrado
+        return found_ids[0], code_info  # Retorna o primeiro ID encontrado e as informações do código
     
     return None
+
 
 
 def main():
@@ -240,8 +281,11 @@ def main():
 
     slide_image = extract_slide(image_path=test_image_path)
     
+    #salva slide_image para debug
+    cv2.imwrite("data/output/slide_image_debug.jpg", slide_image)
+    
     try:
-        extracted_id = extract_label_info_ocr(
+        extracted_id, code_info = extract_label_info_ocr(
             slide_image=slide_image,
             patterns=patterns,
             config_path="data/config.json"
@@ -251,6 +295,11 @@ def main():
             print(f"✓ ID da etiqueta extraído com sucesso: {extracted_id}")
         else:
             print("✗ Nenhum ID de etiqueta foi encontrado na imagem")
+
+        if code_info:
+            print(f"✓ Informações do código extraídas: {code_info}")
+        else:
+            print("✗ Nenhum código (QR/DataMatrix/Code128) foi encontrado na imagem")
             
     except Exception as e:
         print(f"✗ Erro durante a extração: {e}")
