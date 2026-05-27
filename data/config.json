@@ -1,0 +1,16 @@
+{
+    "slide_img_path": "data/slide_img.png",
+    "output_boximg_path": "data/box_img.png",
+    "case_id_list": ["[A-Z][0-9]{2}-[0-9]{6}"],
+    "mask_params": {
+        "hsv_lower": [0, 0, 120],
+        "hsv_upper": [179, 80, 255],
+        "kernel_size": [25, 25],
+        "morph_close_iterations": 2,
+        "morph_open_iterations": 1,
+        "binary_threshold": 10,
+        "padding": 5,
+        "draw_box_color": [0, 255, 0],
+        "draw_box_thickness": 20
+    }
+}
